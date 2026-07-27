@@ -1,0 +1,62 @@
+puml
+@startuml Standard
+
+title Standard Bank Context Diagram
+
+!include <C4/C4_Component>
+
+Person(Customer, "Пользователь")
+Person(CallCenterEmployee, "Сотрудник кол-центра")
+Person(PartnerCallCenterEmployee, "Сотрудник партнерского кол-центра")
+Person(FrontOfficeEmployee, "Сотрудник фронт-офиса")
+Person(DepositBackOfficeEmployee, "Сотрудник отдела депозитов")
+Person(CreditBackOfficeEmployee, "Сотрудник отдела кредитования")
+
+System(WebSite, "Сайт", "Сайт с маркетинговой информацией и формой заявки на депозит")
+System(InternetBank, "Интернет-банк","Интернет-банк")
+System(CRM, "Система кол-центра","Система кол-центра")
+System(ABS, "АБС","АБС")
+System(DepositConveyor, "Депозитный конвейер (новая система)", "Система, реализующая flow заявок на депозит")
+System(CreditConveyor, "Кредитный конвейер", "Кредитный конвейер")
+System(CreditScoring, "Система кредитного скоринга", "Система кредитного скоринга")
+System(SMSGateway, "СМС-шлюз телеком-оператора")
+
+System_Ext(PartnerCRM, "Система партнёрского кол-центра")
+System_Ext(CreditHistoryBureau, "Бюро кредитныйх историй")
+System_Ext(CellularOperator, "Телеком-оператор")
+
+Rel(Customer, WebSite, "Заявки на открытие депозита")
+Rel(Customer, InternetBank, "Текущие счета\nПлатежи\nЗаявки на открытие депозита")
+
+Rel(FrontOfficeEmployee, DepositConveyor, "Заявки на депозит (идентификация)\nЗагрузка докуметов")
+Rel(FrontOfficeEmployee, ABS, "Заявки на кредит")
+Rel(DepositBackOfficeEmployee, DepositConveyor, "Заявки на депозит (расчёт ставок)")
+Rel(CreditBackOfficeEmployee, DepositConveyor, "Заявки на депозит (расчёт кредитных рисков для персональных ставок)\nЕжедневные ставки по депозитам")
+Rel(CreditBackOfficeEmployee, CreditConveyor, "Заявки на кредит")
+Rel(CallCenterEmployee, CRM, "Обработка заявок на депозит (по телефону или с сайта)")
+Rel(PartnerCallCenterEmployee, PartnerCRM, "Обработка заявок на депозит (по телефону или с сайта)")
+
+Rel(WebSite, DepositConveyor, "Ставки по депозитам")
+Rel(WebSite, CRM, "Заявки на открытие депозитов (расчет ставок)")
+
+Rel(InternetBank, ABS, "Заявки на открытие счетов\nПроведение платежей")
+Rel(InternetBank, DepositConveyor, "Ставки по депозитам\nЗаявки на открытие депозитов (расчет ставок)")
+
+Rel(ABS, SMSGateway, "Оповещение о согласовании ставки по депозиту")
+Rel(DepositConveyor, SMSGateway, "Код авторизации на открытие депозита")
+
+Rel(DepositConveyor, ABS, "Одобренные заявки на депозит")
+
+Rel(ABS, CreditConveyor, "Заявки на кредит")
+BiRel(ABS, CreditScoring, "Платежи по кредитам\nСтатусы заявок")
+BiRel(CreditConveyor, CreditScoring, "Номера платежей\nПолучение данных скоринга")
+
+Rel(CreditHistoryBureau, CreditScoring, "Кредитная история")
+
+Rel(CRM, DepositConveyor, "Заявки на расчёт ставок по депозитам")
+Rel(PartnerCRM, DepositConveyor, "Заявки на расчёт ставок по депозитам")
+
+Rel(SMSGateway, CellularOperator, "СМС-коммуникации")
+
+
+@enduml

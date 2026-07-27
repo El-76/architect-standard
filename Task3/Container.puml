@@ -1,0 +1,92 @@
+puml
+@startuml Standard
+
+title Standard Bank Container Diagram
+
+!include <C4/C4_Component>
+
+Person(Customer, "Пользователь")
+Person(CallCenterEmployee, "Сотрудник кол-центра")
+Person(PartnerCallCenterEmployee, "Сотрудник партнерского кол-центра")
+Person(FrontOfficeEmployee, "Сотрудник фронт-офиса")
+Person(DepositBackOfficeEmployee, "Сотрудник отдела депозитов")
+Person(CreditBackOfficeEmployee, "Сотрудник отдела кредитования")
+
+System_Boundary(DepositConveyor, "Депозитный конвейер (новая система)", "Система, где живет flow депозитов (то, что было в почте)") {
+    Container(DepositConveyorUI, "Web UI", "UI Депозитного конвейера")
+    Container(DepositRepositoryService, "Сервис с заявками на депозит - хранение и flow")
+    ContainerDb(DepositRepositoryDatabase, "БД с заявками на депозит")
+    ContainerDb(DepositMessageQueuee, "Kafka DepositConveyor", "Kafka, куда Депозитный конвейер публикует одобренные заявки")
+}
+
+System_Boundary(ABS, "ABS") {
+    Container(ABSCore, "Ядро АБС")
+    Container(AВSDepositImporter, "Deposit Importer", "Импортирует депозиты из Депозитного конвейера")
+    ContainerDb(ABSDatabase, "БД АБС")
+    ContainerDb(ABSMessageQueue, "Kafka АБС", "Kafka, где АБС публикует свои сущности (справочники и тп)")
+}
+
+System_Boundary(InternetBank, "InternetBank") {
+    Container(InternetBankDNSSwitch, "Cold backup DNS Switch", "DNS-переключатель с основного ЦОД на резервный")
+    Container(InternetBankCore, "Ядро InternetBank")
+    ContainerDb(InternetBankDatabase, "БД InternetBank")
+}
+
+System(WebSite, "Сайт", "Сайт с маркетинговой информацией и формой заявки на депозит")
+System(CRM, "Система кол-центра","Система кол-центра")
+System(CreditConveyor, "Кредитный конвейер", "Кредитный конвейер")
+System(CreditScoring, "Система кредитного скоринга", "Система кредитного скоринга")
+System(SMSGateway, "СМС-шлюз телеком-оператора")
+
+System_Ext(PartnerCRM, "Система партнёрского кол-центра")
+System_Ext(CreditHistoryBureau, "Бюро кредитныйх историй")
+System_Ext(CellularOperator, "Телеком-оператор")
+
+Rel(Customer, WebSite, "Заявки на открытие депозита")
+Rel(Customer, InternetBankDNSSwitch, "Текущие счета\nПлатежи\nЗаявки на открытие депозита")
+
+Rel(FrontOfficeEmployee, DepositConveyorUI, "Заявки на депозит (идентификация)\nЗагрузка докуметов")
+Rel(FrontOfficeEmployee, ABSCore, "Заявки на кредит")
+Rel(DepositBackOfficeEmployee, DepositConveyorUI, "Заявки на депозит (расчёт ставок)")
+Rel(CreditBackOfficeEmployee, DepositConveyorUI, "Заявки на депозит (расчёт кредитных рисков для персональных ставок)\nЕжедневные ставки по депозитам")
+Rel(CreditBackOfficeEmployee, CreditConveyor, "Заявки на кредит")
+Rel(CallCenterEmployee, CRM, "Обработка заявок на депозит (по телефону или с сайта)")
+Rel(PartnerCallCenterEmployee, PartnerCRM, "Обработка заявок на депозит (по телефону или с сайта)")
+
+Rel(WebSite, DepositRepositoryService, "Ставки по депозитам")
+Rel(WebSite, CRM, "Заявки на открытие депозитов (расчет ставок)")
+
+Rel(InternetBankCore, ABSCore, "Заявки на открытие счетов\nПроведение платежей")
+Rel(InternetBankDNSSwitch, InternetBankCore, "Запросы")
+Rel(InternetBankCore, DepositRepositoryService, "Ставки по депозитам\nЗаявки на открытие депозитов (расчет ставок)")
+Rel(InternetBankCore, InternetBankDatabase, "Сущности Интернет-банка")
+
+Rel(DepositConveyorUI, DepositRepositoryService, "Заявки на депозит")
+Rel(DepositRepositoryService, DepositRepositoryDatabase, "Заявки на депозит")
+Rel(DepositRepositoryService, DepositMessageQueuee, "Заявки на депозит")
+
+Rel(ABSCore, SMSGateway, "Оповещение о согласовании ставки по депозиту")
+Rel(DepositRepositoryDatabase, SMSGateway, "Код авторизации на открытие депозита")
+
+Rel(DepositMessageQueuee, AВSDepositImporter, "Одобренные заявки на депозит")
+Rel(AВSDepositImporter, ABSCore, "Одобренные заявки на депозит")
+
+Rel(ABSCore, CreditConveyor, "Заявки на кредит")
+BiRel(ABSCore, CreditScoring, "Платежи по кредитам\nСтатусы заявок")
+BiRel(CreditConveyor, CreditScoring, "Номера платежей\nПолучение данных скоринга")
+
+Rel(ABSMessageQueue, DepositRepositoryService, "Данные, необходимые для flow депозитов")
+
+Rel(ABSCore, ABSDatabase, "ABS data")
+Rel(ABSCore, ABSMessageQueue, "ABS data (справочные данные, данные для депозитов)")
+
+Rel(CreditHistoryBureau, CreditScoring, "Кредитная история")
+
+Rel(CRM, DepositRepositoryService, "Заявки на расчёт ставок по депозитам")
+Rel(PartnerCRM, DepositRepositoryService, "Заявки на расчёт ставок по депозитам")
+
+Rel(SMSGateway, CellularOperator, "СМС-коммуникации")
+
+
+
+@enduml
