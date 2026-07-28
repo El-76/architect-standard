@@ -1,0 +1,66 @@
+@startuml StandardComponent
+
+title Standard Bank Component Diagram
+
+!include <C4/C4_Component>
+
+Container(ABS, "АБС")
+
+ContainerDb(ABSDatabase, "БД АБС")
+
+Rel(ABS, ABSDatabase, "Чтение-запись сущностей")
+
+ContainerDb(ABSMessageQueue, "Kafka АБС")
+
+Rel(ABS, ABSMessageQueue, "Данные для скоринга")
+
+Container_Boundary(CreditConveyorMonolith, "Кредитный конвейер") {
+    Component(CreditConveyorCore, "Ядро кредитного конвейера")
+    Component(CreditEventsPublisher, "Publisher событий Кредитного конвейера", "Публикует необходимые данные для скоринга")
+
+    Rel(CreditConveyorCore, CreditEventsPublisher, "Информация о номерах платежей к кредитному договору") 
+}
+
+ContainerDb(CreditConveyorDatabase, "БД Кредитного Конвейера")
+
+Rel(CreditConveyorCore, CreditConveyorDatabase, "Чтение-запись сущностей")
+
+Rel(CreditConveyorCore, ABSDatabase, "Экспорт одобренных заявок")
+
+ContainerDb(CreditConveyorMessageQueue, "Kafka Кредитного Конвейера")
+
+Rel(CreditEventsPublisher, CreditConveyorMessageQueue, "Данные для скорингв")
+
+System_Ext(CreditHistoryBureau, "Бюро кредитных историй")
+
+Container_Boundary(ScoringMonolith, "Система скоринга") {
+    Component(ScoringCore, "Ядро системы скоринга")
+    Component(ABSEventsListener, "Consumer событий из АБС", "Собирает необходимые данные для скоринга")
+    Component(CreditsEventsListener, "Consumer событий из кредитного конвейера", "Собирает необходимые данные для скоринга")
+    Component(CreditsPreapprovalModule, "Модуль предодобрения заявок", "Реализует логику предодобрения")
+
+    Rel(ABSMessageQueue, ABSEventsListener, "Данные для скоринга")
+    Rel(CreditConveyorMessageQueue, CreditsEventsListener, "Данные для скоринга")
+
+    Rel(ABSEventsListener, ScoringCore, "Данные для скоринга")
+    Rel(CreditsEventsListener, ScoringCore, "Данные для скоринга")
+
+    Rel(ScoringCore, CreditHistoryBureau, "Данные для скоринга")
+    Rel(CreditsPreapprovalModule, CreditHistoryBureau, "Данные для предодобрения")
+}
+
+Rel(CreditConveyorCore, CreditsPreapprovalModule, "Предодобрение кредитов")
+
+ContainerDb(ScoringDatabase, "БД Скоринга")
+
+Rel(ScoringCore, ScoringDatabase, "Чтение-запись сущностей")
+
+Container(InternetBank, "Интернет-банк")
+
+Container(WebSite, "Сайт")
+
+Rel(InternetBank, CreditConveyorCore, "Заявки на кредит, условия")
+
+Rel(WebSite, CreditConveyorCore, "Условия, предодобрен или нет")
+
+@enduml
