@@ -1,24 +1,49 @@
-@startuml Microservices
+@startuml StandardComponent
 
-title Warmhouse Microservices Device Connector Component Diagram
+title Standard Bank Deposit Rates Component Diagram
 
 !include <C4/C4_Component>
 
+Container(DepositConveyorUI, "Web UI", "UI Депозитного конвейера")
+
 Container_Boundary(DepositRepositoryService, "Device Connector Service", "Service", "Handles user interactions and system management") {
-    Component(DepositRepositoryAPI, "API Депозитного конвейера", "Работает с заявками. отдаёт текущие ставки")
+    Component(DepositRepositoryAPI, "API Депозитного конвейера", "Работает с заявками, <i>ТЕКУШИМИ СТАВКАМИ</i>")
     Component(ABSEventsListener, "Consumer событий из ABS", "Собирает необходимые данные для ставок")
     Component(DepositEventsPublisher, "Publisher событий Депозитного конвейера", "Публикует одобренные заявки, текущие ставки")
     Component(DepositRatesSFTPExporter, "Коннектор SFTP", "Слушает события по ставкам и периодически сбрасывает в файл по SFTP")
     Component(DepositStorage, "Хранилище заявок на депозит")
     Component(DepositFlowComponent, "Компонент, реализующий flow заявок на депозит")
+
+    Rel(ABSEventsListener, DepositStorage, "Данные для депозитов из ABS")
+    Rel(DepositFlowComponent, DepositStorage, "Запись-чтение сущностей")
+    Rel(DepositRepositoryAPI, DepositFlowComponent, "Изменение статусов заявок\n<i>ТЕКУЩИЕ СТАВКИ</i>")
+    Rel(DepositRepositoryAPI, DepositStorage, "Данные депозитов")
+
+    Rel(DepositFlowComponent, DepositEventsPublisher, "Одобренные заявки на депозит для ABS")
+    Rel(DepositFlowComponent, DepositRatesSFTPExporter, "<i>ТЕКУЩИЕ СТАВКИ</i>")
 }
+
+Rel(DepositConveyorUI, DepositRepositoryAPI, "Вызовы API\n<i>ТЕКУЩИЕ СТАВКИ</i>")
 
 ContainerDb(DepositRepositoryDatabase, "БД с заявками на депозит")
 
-ContainerDb(DepositMessageQueuee, "Kafka DepositConveyor", "Kafka, куда Депозитный конвейер публикует одобренные заявки")
+Rel(DepositStorage, DepositRepositoryDatabase, "Запросы")
+
+ContainerDb(DepositMessageQueuee, "Kafka с заявками на депозит", "Kafka, куда Депозитный конвейер публикует одобренные заявки")
+
+Rel(DepositEventsPublisher, DepositMessageQueuee, "Одобренные заявки на депозит для ABS")
 
 System(CRM, "Система кол-центра","Система кол-центра")
 
-System_Ext(PartnerCRM, "Система партнёрского кол-центра")
+Rel(CRM, DepositRepositoryAPI, "<i>ТЕКУЩИЕ СТАВКИ</i>")
+
+System_Ext(PartnerCRM, "Система партнёрского кол-центра") {
+    Container(PartnerCRMCore, "Ядро системы партнёрского кол-центра")
+    Container(PartnerCRMSFTPServer, "SFTP-сервер для <i>ТЕКУЩИХ СТАВОК</i>")
+
+    Rel(PartnerCRMCore, PartnerCRMSFTPServer, "<i>ТЕКУЩИЕ СТАВКИ</i>")
+}
+
+Rel(DepositRatesSFTPExporter, PartnerCRMSFTPServer, "<i>ТЕКУЩИЕ СТАВКИ</i>")
 
 @enduml
