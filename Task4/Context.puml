@@ -1,7 +1,7 @@
 puml
 @startuml StandardContext
 
-title Standard Bank Context Diagram
+title Standard Bank Deposit Rates Context Diagram
 
 !include <C4/C4_Component>
 
@@ -31,7 +31,7 @@ Rel(Customer, InternetBank, "Текущие счета\nПлатежи\nЗаяв
 Rel(FrontOfficeEmployee, DepositConveyor, "Заявки на депозит (идентификация)\nЗагрузка докуметов")
 Rel(FrontOfficeEmployee, ABS, "Заявки на кредит")
 Rel(DepositBackOfficeEmployee, DepositConveyor, "Заявки на депозит (расчёт ставок)")
-Rel(CreditBackOfficeEmployee, DepositConveyor, "Заявки на депозит (расчёт кредитных рисков для персональных ставок)\nЕжедневные ставки по депозитам")
+Rel(CreditBackOfficeEmployee, DepositConveyor, "Заявки на депозит (расчёт кредитных рисков для персональных ставок)\nЕжедневные ставки по депозитам - <i>ТЕКУЩИЕ СТАВКИ</i>")
 Rel(CreditBackOfficeEmployee, CreditConveyor, "Заявки на кредит")
 Rel(CallCenterEmployee, CRM, "Обработка заявок на депозит (по телефону или с сайта)")
 Rel(PartnerCallCenterEmployee, PartnerCRM, "Обработка заявок на депозит (по телефону или с сайта)")
