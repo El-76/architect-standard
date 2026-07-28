@@ -6,7 +6,7 @@ title Standard Bank Deposit Rates Component Diagram
 
 Container(DepositConveyorUI, "Web UI", "UI Депозитного конвейера")
 
-Container_Boundary(DepositRepositoryService, "Device Connector Service", "Service", "Handles user interactions and system management") {
+Container_Boundary(DepositRepositoryService, "Сервис работы с заявками на депозит") {
     Component(DepositRepositoryAPI, "API Депозитного конвейера", "Работает с заявками, <i>ТЕКУШИМИ СТАВКАМИ</i>")
     Component(ABSEventsListener, "Consumer событий из ABS", "Собирает необходимые данные для ставок")
     Component(DepositEventsPublisher, "Publisher событий Депозитного конвейера", "Публикует одобренные заявки, текущие ставки")

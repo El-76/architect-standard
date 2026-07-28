@@ -48,7 +48,8 @@ Rel(DepositConveyor, SMSGateway, "Код авторизации на откры�
 Rel(DepositConveyor, ABS, "Одобренные заявки на депозит")
 
 Rel(ABS, CreditConveyor, "Заявки на кредит")
-BiRel(ABS, CreditScoring, "Платежи по кредитам\nСтатусы заявок")
+Rel(ABS, CreditScoring, "Платежи по кредитам")
+Rel(CreditConveyor, ABS, "Статусы заявок")
 BiRel(CreditConveyor, CreditScoring, "Номера платежей\nПолучение данных скоринга")
 
 Rel(CreditHistoryBureau, CreditScoring, "Кредитная история")

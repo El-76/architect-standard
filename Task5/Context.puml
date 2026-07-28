@@ -1,7 +1,7 @@
 puml
 @startuml StandardContext
 
-title Standard Bank Deposit Rates Context Diagram
+title Standard Bank Context Diagram
 
 !include <C4/C4_Component>
 
@@ -12,7 +12,7 @@ Person(FrontOfficeEmployee, "Сотрудник фронт-офиса")
 Person(DepositBackOfficeEmployee, "Сотрудник отдела депозитов")
 Person(CreditBackOfficeEmployee, "Сотрудник отдела кредитования")
 
-System(WebSite, "Сайт", "Сайт с маркетинговой информацией и формой заявки на депозит")
+System(WebSite, "Сайт", "Сайт с маркетинговой информацией и формами заявок на депозит и <i>КРЕДИТ</i>")
 System(InternetBank, "Интернет-банк","Интернет-банк")
 System(CRM, "Система кол-центра","Система кол-центра")
 System(ABS, "АБС","АБС")
@@ -25,39 +25,47 @@ System_Ext(PartnerCRM, "Система партнёрского кол-цент�
 System_Ext(CreditHistoryBureau, "Бюро кредитныйх историй")
 System_Ext(CellularOperator, "Телеком-оператор")
 
-AddRelTag("rates_flow", $lineColor="green", $textColor="green", $lineStyle=BoldLine())
+AddRelTag("credit_flow", $lineColor="green", $textColor="green", $lineStyle=BoldLine())
+AddRelTag("old_credit_flow", $lineColor="red", $textColor="red", $lineStyle=BoldLine())
 
-Rel(Customer, WebSite, "Заявки на открытие депозита")
-Rel(Customer, InternetBank, "Текущие счета\nПлатежи\nЗаявки на открытие депозита")
+
+Rel(Customer, WebSite, "Заявки на открытие депозита\n<i>ЗАЯВКИ НА КРЕДИТ</i>", $tags=credit_flow)
+Rel(Customer, InternetBank, "Текущие счета\nПлатежи\nЗаявки на открытие депозита\n<i>ЗАФВКИ НА КРЕДИТ</i>", $tags=credit_flow)
 
 Rel(FrontOfficeEmployee, DepositConveyor, "Заявки на депозит (идентификация)\nЗагрузка докуметов")
-Rel(FrontOfficeEmployee, ABS, "Заявки на кредит")
+Rel(FrontOfficeEmployee, CreditConveyor, "<i>ЗАЯВКИ НА КРЕДИТ</i>", $tags=credit_flow)
+Rel(FrontOfficeEmployee, ABS, "Заявки на кредит", $tags=old_credit_flow)
 Rel(DepositBackOfficeEmployee, DepositConveyor, "Заявки на депозит (расчёт ставок)")
-Rel(CreditBackOfficeEmployee, DepositConveyor, "Заявки на депозит (расчёт кредитных рисков для персональных ставок)\nЕжедневные ставки по депозитам - <i>ТЕКУЩИЕ СТАВКИ</i>", $tags=rates_flow)
-Rel(CreditBackOfficeEmployee, CreditConveyor, "Заявки на кредит")
+Rel(CreditBackOfficeEmployee, DepositConveyor, "Заявки на депозит (расчёт кредитных рисков для персональных ставок)\nЕжедневные ставки по депозитам")
+Rel(CreditBackOfficeEmployee, CreditConveyor, "Заявки на кредит (обработка)", $tags=credit_flow)
 Rel(CallCenterEmployee, CRM, "Обработка заявок на депозит (по телефону или с сайта)")
 Rel(PartnerCallCenterEmployee, PartnerCRM, "Обработка заявок на депозит (по телефону или с сайта)")
 
 Rel(WebSite, DepositConveyor, "Ставки по депозитам")
 Rel(WebSite, CRM, "Заявки на открытие депозитов (расчет ставок)")
 
+Rel(WebSite, CreditConveyor, "<i>ЗАЯВКИ НА КРЕДИТ</i>\n<i>СТАТУС ПРЕДОДОБРЕНИЯ</i>", $tags=credit_flow)
+
 Rel(InternetBank, ABS, "Заявки на открытие счетов\nПроведение платежей")
 Rel(InternetBank, DepositConveyor, "Ставки по депозитам\nЗаявки на открытие депозитов (расчет ставок)")
+Rel(InternetBank, CreditConveyor, "<i>УСЛОВИЯ ПО КРЕДИТАМ</i>\n<i>ЗАЯВКИ НА КРЕДИТ</i>", $tags=credit_flow)
+
 
 Rel(ABS, SMSGateway, "Оповещение о согласовании ставки по депозиту")
 Rel(DepositConveyor, SMSGateway, "Код авторизации на открытие депозита")
+Rel(CreditConveyor, SMSGateway, "Код авторизации на кредит", $tags=credit_flow)
 
 Rel(DepositConveyor, ABS, "Одобренные заявки на депозит")
 
-Rel(ABS, CreditConveyor, "Заявки на кредит")
-Rel(ABS, CreditScoring, "Платежи по кредитам")
-Rel(CreditConveyor, ABS, "Статусы заявок")
-BiRel(CreditConveyor, CreditScoring, "Номера платежей\nПолучение данных скоринга")
+Rel(ABS, CreditConveyor, "Заявки на кредит", $tags=old_credit_flow)
+Rel(ABS, CreditScoring, "Платежи по кредитам", $tags=credit_flow)
+Rel(CreditConveyor, ABS, "Статусы заявок", $tags=credit_flow)
+BiRel(CreditConveyor, CreditScoring, "Номера платежей\nПолучение данных скоринга", $tags=credit_flow)
 
-Rel(CreditHistoryBureau, CreditScoring, "Кредитная история")
+Rel(CreditHistoryBureau, CreditScoring, "Кредитная история", $tags=credit_flow)
 
-BiRel(CRM, DepositConveyor, "Заявки на расчёт ставок по депозитам\n<i>ТЕКУЩИЕ СТАВКИ</i>", $tags=rates_flow)
-BiRel(PartnerCRM, DepositConveyor, "Заявки на расчёт ставок по депозитам\n<i>ТЕКУЩИЕ СТАВКИ</i>", $tags=rates_flow)
+Rel(CRM, DepositConveyor, "Заявки на расчёт ставок по депозитам")
+Rel(PartnerCRM, DepositConveyor, "Заявки на расчёт ставок по депозитам")
 
 Rel(SMSGateway, CellularOperator, "СМС-коммуникации")
 
