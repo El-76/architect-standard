@@ -1,5 +1,5 @@
 puml
-@startuml Standard
+@startuml StandardContainer
 
 title Standard Bank Container Diagram
 
@@ -66,7 +66,7 @@ Rel(DepositRepositoryService, DepositRepositoryDatabase, "Заявки на де
 Rel(DepositRepositoryService, DepositMessageQueuee, "Заявки на депозит")
 
 Rel(ABSCore, SMSGateway, "Оповещение о согласовании ставки по депозиту")
-Rel(DepositRepositoryDatabase, SMSGateway, "Код авторизации на открытие депозита")
+Rel(DepositRepositoryService, SMSGateway, "Код авторизации на открытие депозита")
 
 Rel(DepositMessageQueuee, AВSDepositImporter, "Одобренные заявки на депозит")
 Rel(AВSDepositImporter, ABSCore, "Одобренные заявки на депозит")
@@ -86,7 +86,5 @@ Rel(CRM, DepositRepositoryService, "Заявки на расчёт ставок 
 Rel(PartnerCRM, DepositRepositoryService, "Заявки на расчёт ставок по депозитам")
 
 Rel(SMSGateway, CellularOperator, "СМС-коммуникации")
-
-
 
 @enduml

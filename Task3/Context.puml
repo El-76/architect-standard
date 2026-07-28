@@ -1,5 +1,5 @@
 puml
-@startuml Standard
+@startuml StandardContext
 
 title Standard Bank Context Diagram
 
